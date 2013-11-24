@@ -185,6 +185,11 @@ typedef void(^ALConstraintsBlock)(void);    // a block of method calls to the UI
 /** Distributes the views in this array equally along the selected axis. Views will be the same size (fixed) in the dimension along the axis and will have spacing (variable) between them. */
 - (NSArray *)autoDistributeViewsAlongAxis:(ALAxis)axis withFixedSize:(CGFloat)size alignment:(NSLayoutFormatOptions)alignment;
 
+/** Removes all explicit constraints affecting the views in this array.
+ WARNING: Apple's constraint solver is not optimized for large-scale constraint changes; you may encounter major performance issues after using this method.
+ NOTE: This method preserves implicit constraints, such as intrinsic content size constraints, which you usually do not want to remove. */
+- (void)autoRemoveConstraintsAffectingViews;
+
 @end
 
 

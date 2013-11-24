@@ -1010,6 +1010,18 @@ static UILayoutPriority _globalConstraintPriority = UILayoutPriorityRequired;
     return constraints;
 }
 
+- (void)autoRemoveConstraintsAffectingViews
+{
+    for (id object in self)
+    {
+        if ([object isKindOfClass:[UIView class]])
+        {
+            UIView *view = (UIView *)object;
+            [view autoRemoveConstraintsAffectingView];
+        }
+    }
+}
+
 #pragma mark Internal Helper Methods
 
 /**
