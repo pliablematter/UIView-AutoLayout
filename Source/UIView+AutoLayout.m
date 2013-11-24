@@ -1010,6 +1010,11 @@ static UILayoutPriority _globalConstraintPriority = UILayoutPriorityRequired;
     return constraints;
 }
 
+/**
+ Removes all explicit constraints affecting the views in this array.
+ WARNING: Apple's constraint solver is not optimized for large-scale constraint changes; you may encounter major performance issues after using this method.
+ NOTE: This method preserves implicit constraints, such as intrinsic content size constraints, which you usually do not want to remove.
+ */
 - (void)autoRemoveConstraintsAffectingViews
 {
     for (id object in self)
@@ -1020,6 +1025,87 @@ static UILayoutPriority _globalConstraintPriority = UILayoutPriorityRequired;
             [view autoRemoveConstraintsAffectingView];
         }
     }
+}
+
+/**
+ Wraps this array's views into a container view so that layout contraints can be applied as a group. The container view is added as a subview to the superview
+ of the first view in the array. Dimensions and positioning remain constant. Returns the resulting container view.
+ @return The container view
+ */
+- (UIView *)autoGroupViewsIntoContainerView
+{
+    NSAssert([self al_containsMinimumNumberOfViews:2], @"This array must contain at least 2 views to group.");
+    
+    UIView *firstView = (UIView*) [self objectAtIndex:0];
+    UIView *superview = firstView.superview;
+    
+    CGFloat minX = firstView.frame.origin.x;
+    CGFloat minY = firstView.frame.origin.y;
+    CGFloat maxX = 0.0f;
+    CGFloat maxY = 0.0f;
+    
+    // Determine container coordinates and dimensions
+    for (id object in self)
+    {
+        if ([object isKindOfClass:[UIView class]])
+        {
+            UIView *view = (UIView *)object;
+            CGFloat x = view.frame.origin.x;
+            CGFloat y = view.frame.origin.y;
+            CGFloat w = view.frame.size.width;
+            CGFloat h = view.frame.size.height;
+            if(x < minX)
+            {
+                minX = x;
+            }
+            if(y < minY)
+            {
+                minY = y;
+            }
+            if((x+w) > maxX)
+            {
+                maxX = (x+w);
+            }
+            if((y+h) > maxY)
+            {
+                maxY = (y+h);
+            }
+        }
+    }
+    
+    CGFloat containerWidth = maxX - minX;
+    CGFloat containerHeight = maxY - minY;
+    
+    // Create the container
+    UIView *container = [[UIView alloc] init];
+    container.translatesAutoresizingMaskIntoConstraints = NO;
+    [superview addSubview:container];
+    [container autoPinEdge:ALEdgeLeft toEdge:ALEdgeLeft ofView:superview withOffset:minX];
+    [container autoPinEdge:ALEdgeTop toEdge:ALEdgeTop ofView:superview withOffset:minY];
+    [container autoSetDimension:ALDimensionWidth toSize:containerWidth];
+    [container autoSetDimension:ALDimensionHeight toSize:containerHeight ];
+    
+    // Move views into the container
+    for (id object in self)
+    {
+        if ([object isKindOfClass:[UIView class]])
+        {
+            UIView *view = (UIView *)object;
+            CGFloat x = view.frame.origin.x;
+            CGFloat y = view.frame.origin.y;
+            CGFloat w = view.frame.size.width;
+            CGFloat h = view.frame.size.height;
+            [view autoRemoveConstraintsAffectingView];
+            [view removeFromSuperview];
+            [container addSubview:view];
+            [view autoPinEdge:ALEdgeLeft toEdge:ALEdgeLeft ofView:container withOffset:x - minX];
+            [view autoPinEdge:ALEdgeTop toEdge:ALEdgeTop ofView:container withOffset:y - minY];
+            [view autoSetDimension:ALDimensionWidth toSize:w];
+            [view autoSetDimension:ALDimensionHeight toSize:h];
+        }
+    }
+    
+    return container;
 }
 
 #pragma mark Internal Helper Methods

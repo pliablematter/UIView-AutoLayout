@@ -190,6 +190,8 @@ typedef void(^ALConstraintsBlock)(void);    // a block of method calls to the UI
  NOTE: This method preserves implicit constraints, such as intrinsic content size constraints, which you usually do not want to remove. */
 - (void)autoRemoveConstraintsAffectingViews;
 
+- (UIView *)autoGroupViewsIntoContainerView;
+
 @end
 
 
