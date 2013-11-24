@@ -176,6 +176,8 @@ typedef void(^ALConstraintsBlock)(void);    // a block of method calls to the UI
 /** Sets the given dimension of all the views in this array to a given size. */
 - (NSArray *)autoSetViewsDimension:(ALDimension)dimension toSize:(CGFloat)size;
 
+/** Distributes the views in this array equally along the selected axis. Views will be the same size (variable) in the dimension along the axis. Inset defines space between leading/trailing items and superview. Space between all subviews will be automatically calulated. */
+- (NSArray *)autoDistributeViewsAlongAxis:(ALAxis)axis withLeadingInset:(CGFloat)leadingInset trailingInset:(CGFloat)trailingInset alignment:(NSLayoutFormatOptions)alignment;
 
 /** Distributes the views in this array equally along the selected axis. Views will be the same size (variable) in the dimension along the axis and will have spacing (fixed) between them. */
 - (NSArray *)autoDistributeViewsAlongAxis:(ALAxis)axis withFixedSpacing:(CGFloat)spacing alignment:(NSLayoutFormatOptions)alignment;

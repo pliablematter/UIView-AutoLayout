@@ -823,6 +823,90 @@ static UILayoutPriority _globalConstraintPriority = UILayoutPriorityRequired;
     return constraints;
 }
 
+
+/**
+ Distributes the views in this array equally along the selected axis.
+ Views will be the same size (variable) in the dimension along the axis.
+ Inset defines space between edge items and superview. Space between
+ views will be automatically calulated.
+ 
+ @param axis The axis along which to distribute the subviews.
+ @param leadingInset The fixed amount of leading space to the superview
+ @param trailingInset The fixed amount of trailing space to the superview
+ @param alignment The way in which the subviews will be aligned.
+ @return An array of constraints added.
+ */
+- (NSArray *)autoDistributeViewsAlongAxis:(ALAxis)axis withLeadingInset:(CGFloat)leadingInset trailingInset:(CGFloat)trailingInset alignment:(NSLayoutFormatOptions)alignment
+{
+    NSAssert([self al_containsMinimumNumberOfViews:2], @"This array must contain at least 2 views to distribute.");
+    ALDimension matchedDimension;
+    ALEdge firstEdge, lastEdge;
+    CGFloat superviewSpan = 0;
+    CGFloat subviewSpan = 0;
+    if(axis == ALAxisHorizontal || axis == ALAxisBaseline)
+    {
+        matchedDimension = ALDimensionWidth;
+        firstEdge = ALEdgeLeading;
+        lastEdge = ALEdgeTrailing;
+        for(id object in self)
+        {
+            if ([object isKindOfClass:[UIView class]])
+            {
+                UIView *view = (UIView *)object;
+                subviewSpan += view.frame.size.width;
+                if(view.superview != nil)
+                {
+                    superviewSpan = view.superview.frame.size.width;
+                }
+            }
+        }
+    }
+    else if(axis == ALAxisVertical)
+    {
+        matchedDimension = ALDimensionHeight;
+        firstEdge = ALEdgeTop;
+        lastEdge = ALEdgeBottom;
+        for(id object in self)
+        {
+            if ([object isKindOfClass:[UIView class]])
+            {
+                UIView *view = (UIView *)object;
+                subviewSpan += view.frame.size.height;
+                if(view.superview != nil)
+                {
+                    superviewSpan = view.superview.frame.size.height;
+                }
+            }
+        }
+    }
+    else
+    {
+        NSAssert(nil, @"Not a valid axis.");
+        return nil;
+    }
+    
+    CGFloat totalSpace = superviewSpan - subviewSpan - (leadingInset + trailingInset);
+    CGFloat spacing = totalSpace / ([self count]-1);
+        
+    NSMutableArray *constraints = [NSMutableArray new];
+    UIView *previousView = nil;
+    for (id object in self) {
+        if ([object isKindOfClass:[UIView class]]) {
+            UIView *view = (UIView *)object;
+            if (previousView) {
+                [constraints addObject:[view autoPinEdge:firstEdge toEdge:lastEdge ofView:previousView withOffset:spacing]];
+            }
+            else {
+                [constraints addObject:[view autoPinEdgeToSuperviewEdge:firstEdge withInset:leadingInset]];
+            }
+            previousView = view;
+        }
+    }
+    [constraints addObject:[previousView autoPinEdgeToSuperviewEdge:lastEdge withInset:trailingInset]];
+    
+    return constraints;
+}
+
 /**
  Distributes the views in this array equally along the selected axis.
  Views will be the same size (variable) in the dimension along the axis and will have spacing (fixed) between them.
