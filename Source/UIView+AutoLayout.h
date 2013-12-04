@@ -60,6 +60,9 @@ typedef void(^ALConstraintsBlock)(void);    // a block of method calls to the UI
 /** Removes the given constraints from the views they have been added to. */
 + (void)autoRemoveConstraints:(NSArray *)constraints;
 
+/** Removes all constraints assigned to view **/
+- (void) autoRemoveAllConstraints;
+
 /** Removes all explicit constraints that affect the view.
     WARNING: Apple's constraint solver is not optimized for large-scale constraint changes; you may encounter major performance issues after using this method.
     NOTE: This method preserves implicit constraints, such as intrinsic content size constraints, which you usually do not want to remove. */

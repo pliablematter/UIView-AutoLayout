@@ -106,6 +106,13 @@ static UILayoutPriority _globalConstraintPriority = UILayoutPriorityRequired;
     }
 }
 
+/** Removes all constraints assigned to view **/
+- (void) autoRemoveAllConstraints
+{
+    self.translatesAutoresizingMaskIntoConstraints = NO;
+    [self removeConstraints:self.constraints];
+}
+
 /**
  Removes all explicit constraints that affect the view.
  WARNING: Apple's constraint solver is not optimized for large-scale constraint changes; you may encounter major performance issues after using this method.
